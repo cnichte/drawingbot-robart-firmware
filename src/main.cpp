@@ -2,11 +2,14 @@
  *
  * Project: RobArt the DrawingBot
  * The main program
- *
- * written by Carsten Nichte
+ * 
+ * Copyright (C) 2025 [Carsten Nichte]
  * https://carsten-nichte.de/docs/drawingbot/
- *
+ * This file is part of Robart.
+ * Licensed under the GNU General Public License v3.0. See LICENSE for details.
+ * 
  ******************************************************/
+
 // Hardware:
 // Arduino Pro mini Atmega328 (5V, 16mHz) 
 // + USB to TTL FTDI FT232RL Adapter (Programmiergerät)
@@ -17,6 +20,7 @@
 // - PCA9685 - 16 channel 12 bit PWM servo driver
 //   - SG92R Servos
 // - Kompass GY-91
+
 #include "robart_drive.h"
 #include "robart_bluetooth_serial.h"
 #include "robart_bluetooth_parser.h"
