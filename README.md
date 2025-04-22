@@ -1,6 +1,6 @@
 # Robart Firmware
 
-This is the firmware for the Omnidirectional Pen Plotter [Robart](https://github.com/cnichte/robart).
+This is the firmware for the Omnidirectional Pen Plotter [Robart](https://github.com/cnichte/drawingbot-robart).
 
 Developed under VS-Code and PlatformIO.
 
