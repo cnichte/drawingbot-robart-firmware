@@ -28,7 +28,7 @@ public:
 
   RobArt_Drive(uint8_t motorInterfaceType, uint8_t stepPin1, uint8_t dirPin1, uint8_t stepPin2, uint8_t dirPin2, uint8_t stepPin3, uint8_t dirPin3);
   void setup(float max_speed);
-  void update(float speed_fak);
+  void update(float vx, float vy, float  omega, float speed_fak);
   void calculateWheelSpeeds(float *v1, float *v2, float *v3);
 };
 

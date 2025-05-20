@@ -11,35 +11,38 @@
  ******************************************************/
 #include "robart_bluetooth_parser.h"
 
-RobArt_Bluetooth_Parser::RobArt_Bluetooth_Parser(Stream &stream) : btStream(stream) {}
+RobArt_Parser::RobArt_Parser(Stream &stream) : btStream(stream) {}
 
-void RobArt_Bluetooth_Parser::update() {
+void RobArt_Parser::update() {
     if (btStream.available()) {
         // TODO geht das?, ggfs muss ich hier RobArt_BluetoothSerial übergeben und nicht nur den Stream.
         String command = btStream.readStringUntil('\n');
+        Serial.println("parser.update() - Empfangene Command:" + command);
         command.trim();
         parseCommand(command);
     }
 }
 
-void RobArt_Bluetooth_Parser::onMove(MoveCallback cb) {
+void RobArt_Parser::onMove(MoveCallback cb) {
     moveCb = cb;
 }
 
-void RobArt_Bluetooth_Parser::onStatus(StatusCallback cb) {
+void RobArt_Parser::onStatus(StatusCallback cb) {
     statusCb = cb;
 }
 
-void RobArt_Bluetooth_Parser::onLed(LedCallback cb) {
+void RobArt_Parser::onLed(LedCallback cb) {
     ledCb = cb;
 }
 
-void RobArt_Bluetooth_Parser::parseCommand(const String &command) {
+void RobArt_Parser::parseCommand(const String &command) {
     if (command.startsWith("G1")) {
         int x = extractValue(command, 'X');
         int y = extractValue(command, 'Y');
+
         if (moveCb) moveCb(x, y);
-        else moveTo(x, y);
+        reply(x, y);
+
     } else if (command.startsWith("M3")) {
         int pwm = extractValue(command, 'S');
         if (ledCb) ledCb(true, pwm);
@@ -53,13 +56,14 @@ void RobArt_Bluetooth_Parser::parseCommand(const String &command) {
             analogWrite(3, 0);
             digitalWrite(13, LOW);
         }
+
     } else if (command.startsWith("M105")) {
         if (statusCb) statusCb();
         else btStream.println("OK T:24.5");
     }
 }
 
-int RobArt_Bluetooth_Parser::extractValue(const String &cmd, char key) {
+int RobArt_Parser::extractValue(const String &cmd, char key) {
     int idx = cmd.indexOf(key);
     if (idx == -1) return 0;
     int endIdx = cmd.indexOf(' ', idx);
@@ -67,12 +71,11 @@ int RobArt_Bluetooth_Parser::extractValue(const String &cmd, char key) {
     return cmd.substring(idx + 1, endIdx).toInt();
 }
 
-void RobArt_Bluetooth_Parser::moveTo(int x, int y) {
+void RobArt_Parser::reply(int x, int y) {
     btStream.print("Moving to X:");
     btStream.print(x);
     btStream.print(" Y:");
     btStream.println(y);
-    // Füge hier echten Bewegungscode hinzu
 }
 
 

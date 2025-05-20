@@ -45,8 +45,13 @@ void RobArt_Drive::setup(float max_speed)
  *
  * @brief Update the drive with the current speed.
  */
-void RobArt_Drive::update(float speed_fak)
+void RobArt_Drive::update(float vx, float vy, float  omega, float speed_fak)
 {
+  this->vx = vx;
+  this->vy = vy;
+  this->omega = omega;
+
+  // Calculate the wheel speeds
   float v1, v2, v3; // store the calculation results
 
   calculateWheelSpeeds(&v1, &v2, &v3);

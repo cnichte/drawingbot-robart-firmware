@@ -15,9 +15,9 @@
 // Licensed under the GNU General Public License v3.0. See LICENSE for details.
 #include "ChangeReporter.h"
 
-void ChangeReporter::reportIfChanged(const String &newValue) {
+void ChangeReporter::reportIfChanged(const String label, const String &newValue) {
     if (newValue != lastValue) {
-        Serial.println(newValue);
+        Serial.println(label + ": " + String(newValue));
         lastValue = newValue;
     }
 }

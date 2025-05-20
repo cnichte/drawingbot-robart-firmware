@@ -6,7 +6,7 @@
 class ChangeReporter {
 public:
     ChangeReporter() = default;
-    void reportIfChanged(const String &newValue);
+    void reportIfChanged(const String label, const String &newValue);
 
 private:
     String lastValue = "";

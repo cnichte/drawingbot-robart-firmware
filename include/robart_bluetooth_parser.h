@@ -12,14 +12,14 @@
 
 #include <Arduino.h>
 
-class RobArt_Bluetooth_Parser
+class RobArt_Parser
 {
 public:
     using MoveCallback = void (*)(int x, int y);
     using StatusCallback = void (*)();
     using LedCallback = void (*)(bool on, int pwm);
 
-    RobArt_Bluetooth_Parser(Stream &stream);
+    RobArt_Parser(Stream &stream);
     void update();
 
     void onMove(MoveCallback cb);
@@ -34,7 +34,7 @@ private:
 
     void parseCommand(const String &command);
     int extractValue(const String &cmd, char key);
-    void moveTo(int x, int y);
+    void reply(int x, int y);
 };
 
 #endif // ROBART_BLUETOOTH_PARSER_H

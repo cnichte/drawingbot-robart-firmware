@@ -1,0 +1,26 @@
+[
+    {
+        "id":"0446c01b-1c47-4ab4-a4e4-68fa00ad9c41",
+        "name": "PEN_UP",
+        "command": "M5",
+        "description": "Stift anheben"
+    },
+    {
+        "id":"a7a1e0a3-2d1f-4c20-b47d-519ac3055c49",
+        "name": "PEN_DOWN",
+        "command": "M3 S90",
+        "description": "Stift absenken"
+    },
+    {
+        "id":"c0f87284-58df-4656-b9b3-31900fe246f8",
+        "name": "MOVE_FAST",
+        "command": "G0 X{X} Y{Y}",
+        "description": "Schnellpositionierung"
+    },
+    {
+        "id":"787b2faa-c2c0-4963-8fcc-e5c26e9b5737",
+        "name": "DRAW_LINE",
+        "command": "G1 X{X} Y{Y}",
+        "description": "Linienbewegung"
+    }
+]
