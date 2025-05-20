@@ -33,30 +33,18 @@ void RobArt_BluetoothSerial::send(const String &message)
 }
 
 String RobArt_BluetoothSerial::receive() {
-    if (btStream && btStream->available()) {
-        return btStream->readStringUntil('\n');
-    }
-    return "";
-}
-/*
-// The receive() method reads characters with a 2ms delay per character, which could block execution and miss data if the input is fast or large.
-String RobArt_BluetoothSerial::receive()
-{
-    // Das geht so nicht weil Bluetooth fehlt -> String result_1 = Bluetooth.readStringUntil('\n');
-
     String result = "";
-    if (btStream)
-    {
-        while (btStream->available())
-        {
+    if (btStream && btStream->available()) {
+        while (btStream->available()) {
             char c = btStream->read();
+            if (c == '\n') break; // Stop at newline
             result += c;
-            delay(2);
+            // No delay needed; rely on loop()'s timing
         }
     }
     return result;
 }
-*/
+
 bool RobArt_BluetoothSerial::available()
 {
     return btStream && btStream->available();

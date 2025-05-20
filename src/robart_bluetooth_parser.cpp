@@ -14,12 +14,17 @@
 RobArt_Parser::RobArt_Parser(Stream &stream) : btStream(stream) {}
 
 void RobArt_Parser::update() {
+    static String command = ""; // Static to retain data across calls
     if (btStream.available()) {
-        // TODO geht das?, ggfs muss ich hier RobArt_BluetoothSerial übergeben und nicht nur den Stream.
-        String command = btStream.readStringUntil('\n');
-        Serial.println("parser.update() - Empfangene Command:" + command);
-        command.trim();
-        parseCommand(command);
+        char c = btStream.read();
+        if (c == '\n') {
+            Serial.println("parser.update() - Empfangene Command: " + command);
+            command.trim();
+            parseCommand(command);
+            command = ""; // Reset for next command
+        } else {
+            command += c; // Build command incrementally
+        }
     }
 }
 
@@ -47,14 +52,14 @@ void RobArt_Parser::parseCommand(const String &command) {
         int pwm = extractValue(command, 'S');
         if (ledCb) ledCb(true, pwm);
         else {
-            analogWrite(3, pwm); // Beispiel: MOTOR_PIN = 3
-            digitalWrite(13, HIGH); // LED_PIN = 13
+            // analogWrite(3, pwm); // Beispiel: MOTOR_PIN = 3
+            // digitalWrite(13, HIGH); // LED_PIN = 13
         }
     } else if (command.startsWith("M5")) {
         if (ledCb) ledCb(false, 0);
         else {
-            analogWrite(3, 0);
-            digitalWrite(13, LOW);
+            // analogWrite(3, 0);
+            // digitalWrite(13, LOW);
         }
 
     } else if (command.startsWith("M105")) {

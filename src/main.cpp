@@ -70,12 +70,12 @@ void setup()
   parser = new RobArt_Parser(bluetooth.getStream());
   
   Serial.println("Drive initialized.");
-  drive.setup(1000); // max 4000
+  drive.setup(1000); // 1000 max 4000
 
   parser->onMove([](int x, int y) {
     // Movement logic
     Serial.println("Moving to X: " + String(x) + " Y: " + String(y));
-    drive.update(x, y, 0, 1);
+    drive.update(x, y, 0, 10);
   });
 
   parser->onLed([](bool on, int pwm) {
@@ -92,6 +92,7 @@ void loop()
 {
   if (parser) {
     parser->update();
+    drive.update(100, 100, 0, 10); //! debug
   }
   delay(10);
 }
