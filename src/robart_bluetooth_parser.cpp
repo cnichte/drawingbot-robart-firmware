@@ -52,14 +52,14 @@ void RobArt_Parser::parseCommand(const String &command) {
         int pwm = extractValue(command, 'S');
         if (ledCb) ledCb(true, pwm);
         else {
-            // analogWrite(3, pwm); // Beispiel: MOTOR_PIN = 3
-            // digitalWrite(13, HIGH); // LED_PIN = 13
+            //! analogWrite(3, pwm); // Beispiel: MOTOR_PIN = 3
+            //! digitalWrite(13, HIGH); // LED_PIN = 13
         }
     } else if (command.startsWith("M5")) {
         if (ledCb) ledCb(false, 0);
         else {
-            // analogWrite(3, 0);
-            // digitalWrite(13, LOW);
+            //! analogWrite(3, 0);
+            //! digitalWrite(13, LOW);
         }
 
     } else if (command.startsWith("M105")) {
