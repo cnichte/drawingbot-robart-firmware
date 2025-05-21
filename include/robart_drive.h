@@ -30,6 +30,7 @@ public:
   void setup(float max_speed);
   void update(float vx, float vy, float  omega, float speed_fak);
   void calculateWheelSpeeds(float *v1, float *v2, float *v3);
+  void run();
 };
 
 #endif

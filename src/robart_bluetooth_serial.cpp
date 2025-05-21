@@ -21,7 +21,16 @@ void RobArt_BluetoothSerial::begin(long baudRate)
 {
     btStream = new SoftwareSerial(rx, tx);
     btStream->begin(baudRate);
-    btStream->print("AT+RobArtDrawingBotBLE");
+    
+    // TODO: Das funktioniert noch nicht...?
+    /*
+    btStream->print("AT+ROBARTCounterBLE");
+    delay(100);
+    btStream->print("AT+BAUD0"); // Ensure 9600 baud (0 = 9600)
+    delay(100);
+    btStream->print("AT+MODE0"); // Peripheral mode
+    delay(100);
+    */
 }
 
 void RobArt_BluetoothSerial::send(const String &message)
@@ -37,10 +46,13 @@ String RobArt_BluetoothSerial::receive() {
     if (btStream && btStream->available()) {
         while (btStream->available()) {
             char c = btStream->read();
+            Serial.println("read: " + c);
             if (c == '\n') break; // Stop at newline
             result += c;
             // No delay needed; rely on loop()'s timing
         }
+    }else {
+        Serial.println("Bluetooth stream not available");
     }
     return result;
 }

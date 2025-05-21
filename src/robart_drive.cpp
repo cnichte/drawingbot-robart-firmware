@@ -47,7 +47,6 @@ void RobArt_Drive::setup(float max_speed)
  */
 void RobArt_Drive::update(float vx, float vy, float  omega, float speed_fak)
 {
-
   this->vx = vx;
   this->vy = vy;
   this->omega = omega;
@@ -61,25 +60,30 @@ void RobArt_Drive::update(float vx, float vy, float  omega, float speed_fak)
 
   calculateWheelSpeeds(&v1, &v2, &v3);
   
-  Serial.println("Motor v1: " + String(v1) + ", v2: " + String(v2) + ", v3: " + String(v3));
-  Serial.println("Motor v1: " + String(v1 * speed_fak) + ", v2: " + String(v2 * speed_fak) + ", v3: " + String(v3 * speed_fak));
+  Serial.println("Calculated v1: " + String(v1) + ", v2: " + String(v2) + ", v3: " + String(v3));
+  Serial.println("Scaled     v1: " + String(v1 * speed_fak) + ", v2: " + String(v2 * speed_fak) + ", v3: " + String(v3 * speed_fak));
   Serial.println("----------------------------------");
 
   // Transferring wheel speeds to the motors
-  // motor1.setSpeed(v1 * speed_fak);
-  // motor2.setSpeed(v2 * speed_fak);
-  // motor3.setSpeed(v3 * speed_fak);
+  motor1.setSpeed(v1 * speed_fak);
+  motor2.setSpeed(v2 * speed_fak);
+  motor3.setSpeed(v3 * speed_fak);
+}
 
-  // TODO: Motoren auschalten wenn alle drei stehen.
-
-  motor1.setSpeed(250);
-  motor2.setSpeed(500);
-  motor3.setSpeed(1000);
-
+/**
+ * Run the motors with the current speed.
+ * The motors are run with the current speed.
+ * This must be called in the loop() function.
+ * 
+ * @brief Run the motors with the current speed.
+ */
+void RobArt_Drive::run()
+{
   motor1.runSpeed();
   motor2.runSpeed();
   motor3.runSpeed();
 }
+
 
 /**
  * Calculate the wheel speeds from the velocity and the radius of the wheel.

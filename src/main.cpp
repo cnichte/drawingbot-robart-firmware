@@ -21,6 +21,11 @@
 //   - SG92R Servos
 // - Kompass GY-91
 
+// TODO: Motoren auschalten wenn alle drei stehen.
+// TODO: Ich muss dann natürlich auch Schritte zählen
+// TODO: Richtung umschalten.
+// TODO: Microstepping per Software ändern.
+
 #include "robart_drive.h"
 #include "robart_bluetooth_serial.h"
 #include "robart_bluetooth_parser.h"
@@ -83,25 +88,39 @@ void loop()
 {
   if (parser)
   {
-    parser->update();
-
+    parser->update(); // Update the parser with incoming data
     parser->onMove([](int x, int y)
     {
-      // Movement logic
       Serial.println("Moving to X: " + String(x) + " Y: " + String(y));
       drive.update(x, y, 0, 10); 
     });
-
-    parser->onLed([](bool on, int pwm)
-    {
-      // analogWrite(3, on ? pwm : 0);
-      // digitalWrite(13, on ? HIGH : LOW);
-    });
-
-    parser->onStatus([]()
-    { 
-      bluetooth.println("OK T:23.7");
-    });
   }
-  //! delay(10);
+  
+  drive.run(); // Run the motors
 }
+
+/* main.cpp Minimal Example (works)
+
+#include <AccelStepper.h>
+#define motorInterfaceType 1
+AccelStepper motor1(motorInterfaceType, 3, 2);
+AccelStepper motor2(motorInterfaceType, 5, 4);
+AccelStepper motor3(motorInterfaceType, 7, 6);
+
+void setup() {
+    Serial.begin(9600);
+    motor1.setMaxSpeed(1000);
+    motor2.setMaxSpeed(1000);
+    motor3.setMaxSpeed(1000);
+    motor1.setSpeed(250);
+    motor2.setSpeed(500);
+    motor3.setSpeed(1000);
+}
+
+void loop() {
+    motor1.runSpeed();
+    motor2.runSpeed();
+    motor3.runSpeed();
+}
+
+*/
