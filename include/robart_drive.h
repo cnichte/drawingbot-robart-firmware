@@ -24,7 +24,7 @@ private:
   AccelStepper motor2;
   AccelStepper motor3;
   
-  Mode currentMode = PLOT_MODE; // Default to plot mode
+  Mode currentMode = DRIVING_MODE; // Default to plot mode (normaly)
 
   float sqrt3 = 1.73205;
   float r = 0.3; // Distance from robot center to wheel (meters)

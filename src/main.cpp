@@ -56,7 +56,7 @@ Example for Drive:
 - Richtung umschalten?
 - Microstepping per Software ändern (Kommt erst mit Maximilians Treiber)
 - ? HardwareSerial für Bluetooth verwenden (und für den Serial Monitor SoftwareSerial verwenden)
-
+- Etwas zurück geben (hat schon mal funktioniert)
 Erledigt:
 - Ich muss Schritte zählen:plot-mode. Done!
 
