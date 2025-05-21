@@ -16,6 +16,9 @@ class RobArt_Parser
 {
 public:
     using MoveCallback = void (*)(int x, int y);
+    using PenCallback = void (*)(uint8_t penId);
+    using PenControlCallback = void (*)(bool lift, float value); // true = down, false = up; value = angle or PWM
+
     using StatusCallback = void (*)();
     using LedCallback = void (*)(bool on, int pwm);
 
@@ -23,12 +26,19 @@ public:
     void update();
 
     void onMove(MoveCallback cb);
+    void onPenSelect(PenCallback cb);
+    void onPenControl(PenControlCallback cb);
+
     void onStatus(StatusCallback cb);
     void onLed(LedCallback cb);
-
+    
 private:
     Stream &btStream;
+    
     MoveCallback moveCb = nullptr;
+    PenCallback penCb = nullptr;
+    PenControlCallback penControlCb = nullptr; 
+
     StatusCallback statusCb = nullptr;
     LedCallback ledCb = nullptr;
 

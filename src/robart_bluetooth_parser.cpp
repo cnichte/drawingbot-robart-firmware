@@ -32,34 +32,33 @@ void RobArt_Parser::update() {
     }
 }
 
-void RobArt_Parser::onMove(MoveCallback cb) {
-    moveCb = cb;
-}
-
-void RobArt_Parser::onStatus(StatusCallback cb) {
-    statusCb = cb;
-}
-
-void RobArt_Parser::onLed(LedCallback cb) {
-    ledCb = cb;
-}
+// Sets the callback functions for different events
+void RobArt_Parser::onMove(MoveCallback cb) { moveCb = cb; }
+void RobArt_Parser::onPenSelect(PenCallback cb) { penCb = cb; }
+void RobArt_Parser::onPenControl(PenControlCallback cb) { penControlCb = cb; }
+void RobArt_Parser::onStatus(StatusCallback cb) { statusCb = cb;}
+void RobArt_Parser::onLed(LedCallback cb) { ledCb = cb; }
 
 // Parses the command string and executes the corresponding action
 // For example, "G1 X10 Y20" will move to coordinates (10, 20)
 // Calls the appropriate callback functions based on the command
 void RobArt_Parser::parseCommand(const String &command) {
     if (command.startsWith("G1")) {
-        int x = extractValue(command, 'X');
-        int y = extractValue(command, 'Y');
-
+        float x = extractValue(command, 'X');
+        float y = extractValue(command, 'Y');
         if (moveCb) moveCb(x, y);
         reply(x, y);
-
+    } else if (command.startsWith("T")) {
+        uint8_t penId = (uint8_t)extractValue(command, 'T');
+        if (penCb) penCb(penId);
     } else if (command.startsWith("M3")) {
-        int pwm = extractValue(command, 'S');
-        if (ledCb) ledCb(true, pwm);
+        float value = extractValue(command, 'S'); // Optional PWM for fine control
+        if (penControlCb) penControlCb(true, value); // Pen down
     } else if (command.startsWith("M5")) {
-        if (ledCb) ledCb(false, 0);
+        if (penControlCb) penControlCb(false, 0); // Pen up
+    } else if (command.startsWith("M7")) {
+        float angle = extractValue(command, 'S');
+        if (penControlCb) penControlCb(true, angle); // Set angle
     } else if (command.startsWith("M105")) {
         if (statusCb) statusCb();
         else btStream.println("OK T:24.5");

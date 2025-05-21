@@ -25,14 +25,16 @@
 // TODO: Ich muss dann natürlich auch Schritte zählen
 // TODO: Richtung umschalten.
 // TODO: Microstepping per Software ändern.
+// TODO: HardwareSerial für Bluetooth verwenden (und für den Serial Monitor SoftwareSerial verwenden)
 
 #include "robart_drive.h"
 #include "robart_bluetooth_serial.h"
 #include "robart_bluetooth_parser.h"
+#include "robart_pen_manager.h"
 #include "ChangeReporter.h"
 
 // Define stepper motor connections and motor interface type.
-// Motor interface type must be set to 1 when using a driver:
+// Motor interface type must be set to 1 when using a driver.
 #define motorInterfaceType 1
 
 // Motor 1 - Pins for direction and steps
@@ -45,17 +47,36 @@
 #define dirPin3 6
 #define stepPin3 7
 
+#define motorEnable 8 // Pin to enable|disable all 3 motor drivers
+#define isFree_9 9    // unused pin
+
+#define btRxPin 10 // RX pin for Bluetooth module
+#define btTxPin 11 // TX pin for Bluetooth module
+
+#define isFree_12 12 // unused pin
+#define idFree_13 13 // unused pin
+
 ChangeReporter statusReporter;
 // Bluetooth Modul an RX=2, TX=3
-RobArt_BluetoothSerial bluetooth(10, 11);
+RobArt_BluetoothSerial bluetooth(btRxPin, btTxPin);
 // The Command Parser
 RobArt_Parser *parser = nullptr;
 // RobArt_drive Instanz to manage the three stepper motors
 RobArt_Drive drive = RobArt_Drive(motorInterfaceType, stepPin1, dirPin1, stepPin2, dirPin2, stepPin3, dirPin3);
 // Pen control
-char pen_nr;
-char pen_command;
-int counter = 0;
+RobArt_PenManager penManager;
+
+/*
+G-Code Example:
+
+T2         ; Select pen 2
+M5         ; Pen up
+G1 X10 Y10 ; Move to (10,10)
+M3         ; Pen down
+M7 S45     ; Set angle to 45°
+G1 X20 Y20 ; Draw to (20,20)
+M5         ; Pen up
+*/
 
 // Arduino Setup Function
 // The setup function is where you initialize your variables, pin modes, start using libraries, etc.
@@ -77,6 +98,15 @@ void setup()
 
   Serial.println("Drive initialized.");
   drive.setup(1000); // 1000 max 4000
+
+  penManager.begin(); // Initialize PCA9685
+  // Add 5 pens (10 servos, channels 0–9)
+  penManager.addPen(0, 0, 1, 500, 1500, 1000, 2000); // Pen 0: lift ch0, angle ch1
+  penManager.addPen(1, 2, 3, 500, 1500, 1000, 2000); // Pen 1: lift ch2, angle ch3
+  penManager.addPen(2, 4, 5, 500, 1500, 1000, 2000);
+  penManager.addPen(3, 6, 7, 500, 1500, 1000, 2000);
+  penManager.addPen(4, 8, 9, 500, 1500, 1000, 2000);
+  Serial.println("PenManager initialized.");
 }
 
 // The loop function is where the program runs continuously
@@ -89,11 +119,31 @@ void loop()
   if (parser)
   {
     parser->update(); // Update the parser with incoming data
+
     parser->onMove([](int x, int y)
     {
       Serial.println("Moving to X: " + String(x) + " Y: " + String(y));
       drive.update(x, y, 0, 10); 
     });
+
+    parser->onPenControl([](bool lift, float value) {
+      if (!lift) {
+        penManager.setLift(false); // M5: Pen up
+        Serial.println("Pen up");
+      } else if (value >= 0 && value <= 180) {
+        penManager.setAngle(value); // M7 S<angle>: Set angle
+        Serial.println("Set angle to: " + String(value, 1));
+      } else {
+        penManager.setLift(true); // M3: Pen down
+        Serial.println("Pen down");
+      }
+    });
+
+    parser->onPenSelect([](uint8_t penId) {
+        penManager.selectPen(penId);
+        Serial.println("Selected Pen: " + String(penId));
+    });
+
   }
   
   drive.run(); // Run the motors
