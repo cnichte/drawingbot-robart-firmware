@@ -11,8 +11,12 @@
  ******************************************************/
 #include "robart_bluetooth_parser.h"
 
+// Constructor for the RobArt_Parser class
+// Initializes the Bluetooth stream
 RobArt_Parser::RobArt_Parser(Stream &stream) : btStream(stream) {}
 
+// Updates the parser by checking for available data in the Bluetooth stream
+// Reads incoming characters and builds a command string until a newline character is encountered
 void RobArt_Parser::update() {
     static String command = ""; // Static to retain data across calls
     if (btStream.available()) {
@@ -40,6 +44,9 @@ void RobArt_Parser::onLed(LedCallback cb) {
     ledCb = cb;
 }
 
+// Parses the command string and executes the corresponding action
+// For example, "G1 X10 Y20" will move to coordinates (10, 20)
+// Calls the appropriate callback functions based on the command
 void RobArt_Parser::parseCommand(const String &command) {
     if (command.startsWith("G1")) {
         int x = extractValue(command, 'X');
@@ -51,23 +58,17 @@ void RobArt_Parser::parseCommand(const String &command) {
     } else if (command.startsWith("M3")) {
         int pwm = extractValue(command, 'S');
         if (ledCb) ledCb(true, pwm);
-        else {
-            //! analogWrite(3, pwm); // Beispiel: MOTOR_PIN = 3
-            //! digitalWrite(13, HIGH); // LED_PIN = 13
-        }
     } else if (command.startsWith("M5")) {
         if (ledCb) ledCb(false, 0);
-        else {
-            //! analogWrite(3, 0);
-            //! digitalWrite(13, LOW);
-        }
-
     } else if (command.startsWith("M105")) {
         if (statusCb) statusCb();
         else btStream.println("OK T:24.5");
     }
 }
 
+// Extracts the value associated with a key in the command string
+// For example, in "G1 X10 Y20", it extracts 10 for 'X' and 20 for 'Y'
+// Returns 0 if the key is not found
 int RobArt_Parser::extractValue(const String &cmd, char key) {
     int idx = cmd.indexOf(key);
     if (idx == -1) return 0;
@@ -77,6 +78,8 @@ int RobArt_Parser::extractValue(const String &cmd, char key) {
 }
 
 void RobArt_Parser::reply(int x, int y) {
+    // TODO: bluetooth.println("Moving to X: " + String(x) + " Y: " + String(y) )
+
     btStream.print("Moving to X:");
     btStream.print(x);
     btStream.print(" Y:");
@@ -91,7 +94,7 @@ void RobArt_Parser::reply(int x, int y) {
 /*
 void RobArt_Bluetooth_Parser::parsePEN(String params)
 {
-    // sscanf(params.substring(index).c_str(), "%f %f", &pen_nr, &pen_command);
+    sscanf(params.substring(index).c_str(), "%f %f", &pen_nr, &pen_command);
 }
 
 // in: path
