@@ -36,6 +36,8 @@ void RobArt_Parser::update() {
 void RobArt_Parser::onMove(MoveCallback cb) { moveCb = cb; }
 void RobArt_Parser::onPenSelect(PenCallback cb) { penCb = cb; }
 void RobArt_Parser::onPenControl(PenControlCallback cb) { penControlCb = cb; }
+void RobArt_Parser::onMode(ModeCallback cb) { modeCb = cb; }
+
 void RobArt_Parser::onStatus(StatusCallback cb) { statusCb = cb;}
 void RobArt_Parser::onLed(LedCallback cb) { ledCb = cb; }
 
@@ -59,6 +61,9 @@ void RobArt_Parser::parseCommand(const String &command) {
     } else if (command.startsWith("M7")) {
         float angle = extractValue(command, 'S');
         if (penControlCb) penControlCb(true, angle); // Set angle
+        } else if (command.startsWith("M100")) {
+        uint8_t mode = (uint8_t)extractValue(command, 'S');
+        if (modeCb) modeCb(mode);
     } else if (command.startsWith("M105")) {
         if (statusCb) statusCb();
         else btStream.println("OK T:24.5");

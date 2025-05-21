@@ -10,22 +10,60 @@
  *
  ******************************************************/
 
-// Hardware:
-// Arduino Pro mini Atmega328 (5V, 16mHz)
-// + USB to TTL FTDI FT232RL Adapter (Programmiergerät)
-// - HM-10, Bluetooth 4.0, BLE-compatible
-//   - SparkFun Logic Level Konverter, bidirektional
-// - DRV8825 Stepper Motor driver
-//   - Hybridschrittmotor NEMA 17 , 1,8° , 2,5A , 3,1V
-// - PCA9685 - 16 channel 12 bit PWM servo driver
-//   - SG92R Servos
-// - Kompass GY-91
+/******************************************************
+ * Hardware:
+ ******************************************************
+ Arduino Pro mini Atmega328 (5V, 16mHz)
+ + USB to TTL FTDI FT232RL Adapter (Programmiergerät)
+ - HM-10, Bluetooth 4.0, BLE-compatible
+   - SparkFun Logic Level Konverter, bidirektional
+ - DRV8825 Stepper Motor driver
+   - Hybridschrittmotor NEMA 17 , 1,8° , 2,5A , 3,1V
+ - PCA9685 - 16 channel 12 bit PWM servo driver
+   - 2x5 SG92R Servos
+ - Kompass GY-91
 
-// TODO: Motoren auschalten wenn alle drei stehen.
-// TODO: Ich muss dann natürlich auch Schritte zählen
-// TODO: Richtung umschalten.
-// TODO: Microstepping per Software ändern.
-// TODO: HardwareSerial für Bluetooth verwenden (und für den Serial Monitor SoftwareSerial verwenden)
+******************************************************
+* G-Code Examples:
+******************************************************
+
+Example for PENs + plot:
+------------------------------------
+T2         ; Select pen 2
+M5         ; Pen up
+G1 X10 Y10 ; Move to (10,10)
+M3         ; Pen down
+M7 S45     ; Set angle to 45°
+G1 X20 Y20 ; Draw to (20,20)
+M5         ; Pen up
+
+Example for Mode switching:
+------------------------------------
+M100 S0    ; Switch to driving mode
+G1 X50 Y20 ; Drive with velocity
+M100 S1    ; Switch to plot mode
+G1 X10 Y10 ; Move to position
+
+Example for Drive:
+------------------------------------
+...
+
+******************************************************
+* TODOs
+******************************************************
+
+- Motoren auschalten wenn alle drei stehen.
+- Richtung umschalten?
+- Microstepping per Software ändern (Kommt erst mit Maximilians Treiber)
+- ? HardwareSerial für Bluetooth verwenden (und für den Serial Monitor SoftwareSerial verwenden)
+
+Erledigt:
+- Ich muss Schritte zählen:plot-mode. Done!
+
+*******************************************************/
+
+#include <Wire.h>
+#include <Adafruit_PWMServoDriver.h>
 
 #include "robart_drive.h"
 #include "robart_bluetooth_serial.h"
@@ -66,18 +104,6 @@ RobArt_Drive drive = RobArt_Drive(motorInterfaceType, stepPin1, dirPin1, stepPin
 // Pen control
 RobArt_PenManager penManager;
 
-/*
-G-Code Example:
-
-T2         ; Select pen 2
-M5         ; Pen up
-G1 X10 Y10 ; Move to (10,10)
-M3         ; Pen down
-M7 S45     ; Set angle to 45°
-G1 X20 Y20 ; Draw to (20,20)
-M5         ; Pen up
-*/
-
 // Arduino Setup Function
 // The setup function is where you initialize your variables, pin modes, start using libraries, etc.
 // The setup function will only run once, after each power-up or reset of the Arduino board
@@ -93,11 +119,11 @@ void setup()
   bluetooth.begin(); // Defaults to 9600 baud
   Serial.println("Bluetooth initialized.");
 
-  Serial.println("Parser initialized.");
   parser = new RobArt_Parser(bluetooth.getStream());
+  Serial.println("Parser initialized.");
 
+  drive.setup(1000, 3200, 0.05); // 1000 max 4000, 3200 steps/rev, 50mm wheel diameter
   Serial.println("Drive initialized.");
-  drive.setup(1000); // 1000 max 4000
 
   penManager.begin(); // Initialize PCA9685
   // Add 5 pens (10 servos, channels 0–9)
@@ -122,8 +148,13 @@ void loop()
 
     parser->onMove([](int x, int y)
     {
-      Serial.println("Moving to X: " + String(x) + " Y: " + String(y));
-      drive.update(x, y, 0, 10); 
+        if (drive.getMode() == RobArt_Drive::PLOT_MODE) {
+            Serial.println("Plot Mode - Moving to X: " + String(x, 1) + " Y: " + String(y, 1));
+            drive.moveTo(x, y);
+        } else {
+            Serial.println("Driving Mode - Velocity X: " + String(x, 1) + " Y: " + String(y, 1));
+            drive.update(x, y, 0, 10); // Use x, y as velocities
+        }
     });
 
     parser->onPenControl([](bool lift, float value) {
@@ -144,12 +175,25 @@ void loop()
         Serial.println("Selected Pen: " + String(penId));
     });
 
+    parser->onMode([](uint8_t mode) {
+        if (mode == 0) {
+            drive.setMode(RobArt_Drive::DRIVING_MODE);
+            Serial.println("Switched to Driving Mode");
+        } else if (mode == 1) {
+            drive.setMode(RobArt_Drive::PLOT_MODE);
+            Serial.println("Switched to Plot Mode");
+        }
+    });
+
   }
   
   drive.run(); // Run the motors
 }
 
-/* main.cpp Minimal Example (works)
+/* 
+------------------------------------
+main.cpp Minimal Example (that works)
+------------------------------------
 
 #include <AccelStepper.h>
 #define motorInterfaceType 1

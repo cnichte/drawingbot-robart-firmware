@@ -20,6 +20,7 @@ RobArt_PenManager::RobArt_PenManager() : activePenId(0) {
 
 /**
  * Initialize the PCA9685 PWM driver.
+ * 
  * Parameters:
  * - i2cAddress: I2C address of the PCA9685 (default is 0x40)
  * 

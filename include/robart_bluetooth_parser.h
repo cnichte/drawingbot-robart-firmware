@@ -18,6 +18,7 @@ public:
     using MoveCallback = void (*)(int x, int y);
     using PenCallback = void (*)(uint8_t penId);
     using PenControlCallback = void (*)(bool lift, float value); // true = down, false = up; value = angle or PWM
+    using ModeCallback = void (*)(uint8_t mode); // For M100 S<mode>
 
     using StatusCallback = void (*)();
     using LedCallback = void (*)(bool on, int pwm);
@@ -28,6 +29,7 @@ public:
     void onMove(MoveCallback cb);
     void onPenSelect(PenCallback cb);
     void onPenControl(PenControlCallback cb);
+    void onMode(ModeCallback cb);
 
     void onStatus(StatusCallback cb);
     void onLed(LedCallback cb);
@@ -38,7 +40,8 @@ private:
     MoveCallback moveCb = nullptr;
     PenCallback penCb = nullptr;
     PenControlCallback penControlCb = nullptr; 
-
+    ModeCallback modeCb = nullptr; 
+    
     StatusCallback statusCb = nullptr;
     LedCallback ledCb = nullptr;
 
