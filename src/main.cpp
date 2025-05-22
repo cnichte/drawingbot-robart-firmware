@@ -44,10 +44,6 @@ G1 X50 Y20 ; Drive with velocity
 M100 S1    ; Switch to plot mode
 G1 X10 Y10 ; Move to position
 
-Example for Drive:
-------------------------------------
-...
-
 ******************************************************
 * TODOs
 ******************************************************
@@ -106,9 +102,7 @@ RobArt_PenManager penManager;
 
 // Arduino Setup Function
 // The setup function is where you initialize your variables, pin modes, start using libraries, etc.
-// The setup function will only run once, after each power-up or reset of the Arduino board
-// It initializes the serial communication, the Bluetooth module, and the parser
-// and sets up the drive with a maximum speed
+// It will only run once, after each power-up or reset of the Arduino board
 void setup()
 {
   // put your setup code here, to run once:
@@ -125,26 +119,23 @@ void setup()
   drive.setup(1000, 3200, 0.05); // 1000 max 4000, 3200 steps/rev, 50mm wheel diameter
   Serial.println("Drive initialized.");
 
-  penManager.begin(); // Initialize PCA9685
+  penManager.begin(); // Initialize PCA9685 PWM-Servo-Driver
   // Add 5 pens (10 servos, channels 0–9)
+  // liftChannel, angleChannel, liftMin, liftMax, angleMin, angleMax
   penManager.addPen(0, 0, 1, 500, 1500, 1000, 2000); // Pen 0: lift ch0, angle ch1
   penManager.addPen(1, 2, 3, 500, 1500, 1000, 2000); // Pen 1: lift ch2, angle ch3
-  penManager.addPen(2, 4, 5, 500, 1500, 1000, 2000);
-  penManager.addPen(3, 6, 7, 500, 1500, 1000, 2000);
-  penManager.addPen(4, 8, 9, 500, 1500, 1000, 2000);
+  penManager.addPen(2, 4, 5, 500, 1500, 1000, 2000); // Pen 2: lift ch4, angle ch5
+  penManager.addPen(3, 6, 7, 500, 1500, 1000, 2000); // Pen 3: lift ch6, angle ch7
+  penManager.addPen(4, 8, 9, 500, 1500, 1000, 2000); // Pen 4: lift ch8, angle ch9
   Serial.println("PenManager initialized.");
 }
 
 // The loop function is where the program runs continuously
-// The loop function also handles the pen control and status reporting
-// It uses the parser to handle commands and callbacks for movement, LED control, and status
-// The parser is updated in each loop iteration
-// The parser checks for incoming commands and calls the appropriate callback functions
 void loop()
 {
   if (parser)
   {
-    parser->update(); // Update the parser with incoming data
+    parser->update(); // read incoming data from Bluetooth and parse the stuff
 
     parser->onMove([](int x, int y)
     {
